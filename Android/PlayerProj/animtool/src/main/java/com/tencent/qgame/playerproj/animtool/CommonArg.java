@@ -31,9 +31,9 @@ public class CommonArg {
 
     public String inputPath; // 输入帧文件地址
 
-    public float scale = 0.5f; // alpha 区域缩放大小
+    public float scale = 1.0f; // alpha 区域缩放大小
 
-    public boolean enableCrf = false; // 是否开启可变码率
+    public boolean enableCrf = true; // 是否开启可变码率
 
     public int bitrate = 2000; // 码率
 
@@ -45,6 +45,8 @@ public class CommonArg {
     public String outputPath; // 输出地址
 
     public String frameOutputPath; // 帧图片输出路径
+
+    public String outputDirName; // 输出子目录名，为空时使用默认 output 目录
 
     public int version = 2;
 
@@ -87,6 +89,7 @@ public class CommonArg {
                 ", crf=" + crf +
                 ", scale=" + scale +
                 ", inputPath='" + inputPath + '\'' +
+                ", outputDirName='" + outputDirName + '\'' +
                 ", needAudio=" + needAudio + '\'' +
                 ", audioPath='" + audioPath + '\'' +
                 '}';

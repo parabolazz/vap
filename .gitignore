@@ -12,5 +12,8 @@ npm-debug.log
 
 .cache
 
+build/
+setting.properties
+
 #mac cache 
 .DS_Store

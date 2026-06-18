@@ -56,7 +56,7 @@ public class AnimTool {
      * @param needVideo true 生成完整视频 false 只合成帧图片
      */
     public void create(final CommonArg commonArg, final boolean needVideo) throws Exception{
-        TLog.i(TAG, "start create");
+        TLog.i(TAG, "开始生成");
         createAllFrameImage(commonArg, new IRunResult() {
             @Override
             public boolean run() {
@@ -81,12 +81,12 @@ public class AnimTool {
     private boolean finalCheck(CommonArg commonArg) {
         if (commonArg.isVapx) {
             if (commonArg.srcSet.srcs.isEmpty()) {
-                TLog.i(TAG, "vapx error: src is empty");
+            TLog.i(TAG, "融合动画错误：资源为空");
                 return false;
             }
             for (SrcSet.Src src : commonArg.srcSet.srcs) {
                 if (src.w <=0 || src.h <= 0) {
-                    TLog.i(TAG, "vapx error: src.id=" + src.srcId + ",src.w=" + src.w + ",src.h=" + src.h);
+                    TLog.i(TAG, "融合动画错误：资源 id=" + src.srcId + "，宽=" + src.w + "，高=" + src.h);
                     return false;
                 }
             }
@@ -100,7 +100,7 @@ public class AnimTool {
             return;
         }
 
-        TLog.i(TAG, "createAllFrameImage");
+        TLog.i(TAG, "开始合成帧图片");
         time = System.currentTimeMillis();
 
         // 检测output文件是否存在，不存在则生成
@@ -133,7 +133,7 @@ public class AnimTool {
                         try {
                             createFrame(commonArg, i);
                         } catch (Exception e) {
-                            TLog.e(TAG, "createFrame error:" + e.getMessage());
+                            TLog.e(TAG, "合成帧图片失败：" + e.getMessage());
                         }
                         synchronized (AnimTool.class) {
                             totalP++;
@@ -141,7 +141,7 @@ public class AnimTool {
                             if (toolListener != null) {
                                 toolListener.onProgress(progress);
                             } else {
-                                TLog.i(TAG, "progress " + progress);
+                                TLog.i(TAG, "进度 " + progress);
                             }
                         }
                     }
@@ -153,7 +153,7 @@ public class AnimTool {
                                 result = finishRunnable.run();
                             }
                             long cost = System.currentTimeMillis() - time;
-                            TLog.i(TAG,"Finish cost=" + cost);
+                            TLog.i(TAG,"生成耗时=" + cost + "ms");
                             if (toolListener != null) {
                                 if (result) {
                                     toolListener.onComplete();
@@ -178,7 +178,7 @@ public class AnimTool {
             }
         }
         if (videoFrame == null) {
-            TLog.i(TAG, "frameIndex="+frameIndex +" is empty");
+            TLog.i(TAG, "第 " + frameIndex + " 帧为空");
             return;
         }
         // 最后保存图片
@@ -208,7 +208,7 @@ public class AnimTool {
             // 创建mp4文件
             boolean result = createMp4(commonArg, commonArg.outputPath, commonArg.frameOutputPath);
             if (!result) {
-                TLog.i(TAG, "createMp4 fail");
+                TLog.i(TAG, "生成 MP4 失败");
                 deleteFile(commonArg);
                 return false;
             }
@@ -216,7 +216,7 @@ public class AnimTool {
             if (commonArg.needAudio) {
                 result = mergeAudio2Mp4(commonArg, tempVideoName);
                 if (!result) {
-                    TLog.i(TAG, "mergeAudio2Mp4 fail");
+                    TLog.i(TAG, "合并音频失败");
                     deleteFile(commonArg);
                     return false;
                 }
@@ -229,16 +229,16 @@ public class AnimTool {
             // 将bin文件合并到mp4里
             result = mergeBin2Mp4(commonArg, vapcBinPath, tempVideoName, commonArg.outputPath);
             if (!result) {
-                TLog.i(TAG, "mergeBin2Mp4 fail");
+                TLog.i(TAG, "写入 VAP 配置失败");
                 deleteFile(commonArg);
                 return false;
             }
             deleteFile(commonArg);
             // 计算文件md5
             String md5 = new Md5Util().getFileMD5(new File(commonArg.outputPath + VIDEO_FILE), commonArg.outputPath);
-            TLog.i(TAG, "md5="+md5);
+            TLog.i(TAG, "MD5=" + md5);
         } catch (Exception e) {
-            TLog.e(TAG, "createVideo error:" + e.getMessage());
+            TLog.e(TAG, "生成视频失败：" + e.getMessage());
             return false;
         }
         return true;
@@ -296,7 +296,7 @@ public class AnimTool {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            TLog.e(TAG, "createVapcJson error:" + e.getMessage());
+            TLog.e(TAG, "生成 vapc.json 失败：" + e.getMessage());
             throw new RuntimeException();
         }
     }
@@ -310,9 +310,9 @@ public class AnimTool {
      */
     private boolean createMp4(CommonArg commonArg, String videoPath, String frameImagePath) throws Exception {
 
-        TLog.i(TAG, "run createMp4");
+        TLog.i(TAG, "开始编码 MP4");
         int result = ProcessUtil.run(getFFmpegCmd(commonArg, videoPath, frameImagePath));
-        TLog.i(TAG, "createMp4 result=" + (result == 0? "success" : "fail"));
+        TLog.i(TAG, "编码 MP4 " + (result == 0? "成功" : "失败"));
         return result == 0;
     }
 
@@ -383,9 +383,9 @@ public class AnimTool {
                 "-c:v", "copy",
                 "-c:a", "aac",
                 "-y", commonArg.outputPath + TEMP_VIDEO_AUDIO_FILE};
-        TLog.i(TAG, "run mergeAudio2Mp4");
+        TLog.i(TAG, "开始合并音频");
         int result = ProcessUtil.run(cmd);
-        TLog.i(TAG, "mergeAudio2Mp4 result=" + (result == 0? "success" : "fail"));
+        TLog.i(TAG, "合并音频" + (result == 0? "成功" : "失败"));
         return result == 0;
     }
 
@@ -395,9 +395,9 @@ public class AnimTool {
      */
     private boolean mergeBin2Mp4(CommonArg commonArg, String inputFile, String tempVideoFile, String videoPath) throws Exception {
         String[] cmd = new String[]{commonArg.mp4editCmd, "--insert", ":" + inputFile + ":3", videoPath + tempVideoFile, videoPath + VIDEO_FILE};
-        TLog.i(TAG, "run mergeBin2Mp4");
+        TLog.i(TAG, "开始写入 VAP 配置");
         int result = ProcessUtil.run(cmd);
-        TLog.i(TAG, "mergeBin2Mp4 result=" + (result == 0 ? "success" : "fail"));
+        TLog.i(TAG, "写入 VAP 配置" + (result == 0 ? "成功" : "失败"));
         return result == 0;
     }
 

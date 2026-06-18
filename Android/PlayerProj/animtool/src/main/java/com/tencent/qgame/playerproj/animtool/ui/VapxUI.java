@@ -19,7 +19,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -83,10 +82,10 @@ public class VapxUI {
     private JPanel getAddLayout() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel("add source");
+        JLabel label = new JLabel("融合资源");
         label.setPreferredSize(labelSize);
 
-        JButton btnAdd = new JButton("add");
+        JButton btnAdd = new JButton("添加");
         btnAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -96,7 +95,7 @@ public class VapxUI {
 
         panel.add(label);
         panel.add(btnAdd);
-        panel.add(new JLabel("(simple video don't need add source)"));
+        panel.add(new JLabel("（普通动效不需要添加融合资源）"));
         return panel;
     }
 
@@ -117,16 +116,16 @@ public class VapxUI {
         private final JLabel labelIndex = new JLabel();
         private final JTextField textSrcTag = new JTextField();
         // image -> SrcSet.Src.SRC_TYPE_IMG text -> SrcSet.Src.SRC_TYPE_TXT
-        private final String[] srcTypeArray = new String[]{"image", "text"};
+        private final String[] srcTypeArray = new String[]{"图片", "文字"};
         private final JComboBox<String> boxSrcType = new JComboBox<>(srcTypeArray);
 
         // centerCrop -> SrcSet.Src.FIT_TYPE_CF
-        private final String[] fitTypeArray = new String[]{"fitXY", "centerCrop"};
+        private final String[] fitTypeArray = new String[]{"拉伸铺满", "等比裁剪"};
         private final JComboBox<String> boxFitType = new JComboBox<>(fitTypeArray);
 
         private final JPanel txtPanel = new JPanel();
         private final JTextField textTxtColor = new JTextField();
-        private final JCheckBox checkTxtBold = new JCheckBox("text Bold");
+        private final JCheckBox checkTxtBold = new JCheckBox("文字加粗");
 
         final JLabel labelMaskPathState = new JLabel();
 
@@ -167,16 +166,16 @@ public class VapxUI {
             }
 
             if (src.srcTag == null || "".equals(src.srcTag)) {
-                String msg = "id:" + index + " source tag is empty";
+                String msg = "id:" + index + " 的资源占位符不能为空";
                 TLog.e(TAG, msg);
-                JOptionPane.showMessageDialog(panel, msg, "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, msg, "错误", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
             if (src.srcPath == null || "".equals(src.srcPath)) {
-                String msg = "id:" + index + " mask path is empty";
+                String msg = "id:" + index + " 的遮罩目录不能为空";
                 TLog.e(TAG, msg);
-                JOptionPane.showMessageDialog(panel, msg, "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, msg, "错误", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             return src;
@@ -193,7 +192,7 @@ public class VapxUI {
         }
 
         private void setMaskPath() {
-            String text = maskPath == null? "<html><font color='red'>empty</font></html>" : maskPath;
+            String text = maskPath == null? "<html><font color='red'>未选择</font></html>" : maskPath;
             labelMaskPathState.setText(text);
         }
 
@@ -206,13 +205,13 @@ public class VapxUI {
             panel.add(labelIndex);
 
             // srcTag
-            panel.add(new JLabel(" source tag:"));
+            panel.add(new JLabel(" 占位符："));
             textSrcTag.setPreferredSize(new Dimension(50, 20));
             textSrcTag.setText("tag" + index);
             panel.add(textSrcTag);
 
             // srcType
-            panel.add(new JLabel(" source type:"));
+            panel.add(new JLabel(" 类型："));
             boxSrcType.setSelectedIndex(0);
             panel.add(boxSrcType);
             boxSrcType.addItemListener(new ItemListener() {
@@ -222,7 +221,7 @@ public class VapxUI {
                 }
             });
             // fitType
-            panel.add(new JLabel(" fit type:"));
+            panel.add(new JLabel(" 适配："));
             boxFitType.setSelectedIndex(0);
             panel.add(boxFitType);
 
@@ -230,7 +229,7 @@ public class VapxUI {
 
 
             // delete
-            JLabel labelDelete = new JLabel("<html><font color='red'>delete</font></html>");
+            JLabel labelDelete = new JLabel("<html><font color='red'>删除</font></html>");
             panel.add(labelDelete);
             labelDelete.addMouseListener(new MouseAdapter() {
                 @Override
@@ -249,7 +248,7 @@ public class VapxUI {
             JPanel panel = txtPanel;
             panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-            panel.add(new JLabel(" text color:"));
+            panel.add(new JLabel(" 文字颜色："));
             textTxtColor.setPreferredSize(new Dimension(100, 20));
             textTxtColor.setText("#000000");
             panel.add(textTxtColor);
@@ -264,18 +263,15 @@ public class VapxUI {
             JPanel panel = new JPanel();
             panel.setLayout(new FlowLayout(FlowLayout.LEFT));
             // mask path
-            panel.add(new JLabel(" mask path:"));
-            JButton btnMaskPath = new JButton("choose");
+            panel.add(new JLabel(" 遮罩目录："));
+            JButton btnMaskPath = new JButton("选择");
             panel.add(btnMaskPath);
             btnMaskPath.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    JFileChooser fileChooser = new JFileChooser(new File(toolUI.getInputPath()));
-                    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    int returnVal = fileChooser.showOpenDialog(fileChooser);
-                    if(returnVal == JFileChooser.APPROVE_OPTION) {
-                        // 文件夹路径
-                        maskPath = fileChooser.getSelectedFile().getAbsolutePath();
+                    File file = toolUI.chooseDirectory("选择遮罩目录", toolUI.getInputPath());
+                    if(file != null) {
+                        maskPath = file.getAbsolutePath();
                         setMaskPath();
                     }
                 }

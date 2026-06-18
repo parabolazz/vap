@@ -19,7 +19,7 @@ class OpenSourceUI {
     private final int HEIGHT = 800;
 
     public void createUI() {
-        JFrame frame = new JFrame("open source software");
+        JFrame frame = new JFrame("开源软件许可");
         frame.setSize(WIDTH, HEIGHT);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
@@ -64,7 +64,7 @@ class OpenSourceUI {
                 line = reader.readLine();
             }
         } catch (Exception e) {
-            TLog.i("OpenSourceUI", "ERROR -> " + e.getMessage());
+            TLog.i("OpenSourceUI", "错误 -> " + e.getMessage());
         }
         txtArea.setText(sb.toString());
     }

@@ -25,14 +25,14 @@ class CommonArgTool {
         TLog.i(TAG, os);
 
         if (commonArg.inputPath == null && "".equals(commonArg.inputPath)) {
-            TLog.e(TAG, "input path invalid");
+            TLog.e(TAG, "输入帧目录无效");
             return false;
         }
 
         //  路径检查
         File input = new File(commonArg.inputPath);
         if (!input.exists()) {
-            TLog.e(TAG, "input path invalid " + commonArg.inputPath);
+            TLog.e(TAG, "输入帧目录无效：" + commonArg.inputPath);
             return false;
         }
 
@@ -44,18 +44,21 @@ class CommonArgTool {
         if (commonArg.needAudio) {
             File audio = new File(commonArg.audioPath);
             if (!audio.exists() || commonArg.audioPath == null || commonArg.audioPath.length() < 3) {
-                TLog.e(TAG , "audio file not exists " + commonArg.audioPath);
+                TLog.e(TAG , "音频文件不存在：" + commonArg.audioPath);
                 return false;
             }
             String type = commonArg.audioPath.substring(commonArg.audioPath.length() - 3).toLowerCase();
             if (!"mp3".equals(type)) {
-                TLog.e(TAG , "audio file must be mp3 file " + commonArg.audioPath);
+                TLog.e(TAG , "音频文件必须是 mp3：" + commonArg.audioPath);
                 return false;
             }
         }
 
         // output path
         commonArg.outputPath = commonArg.inputPath + AnimTool.OUTPUT_DIR;
+        if (commonArg.outputDirName != null && commonArg.outputDirName.trim().length() > 0) {
+            commonArg.outputPath = commonArg.outputPath + commonArg.outputDirName.trim() + File.separator;
+        }
 
         // 帧图片生成路径
         commonArg.frameOutputPath = commonArg.outputPath + AnimTool.FRAME_IMAGE_DIR;
@@ -72,7 +75,7 @@ class CommonArgTool {
                 src.z = i;
                 File srcPath = new File(src.srcPath);
                 if (!srcPath.exists()) {
-                    TLog.e(TAG, "src="+ src.srcId+",path invalid " + src.srcPath);
+                    TLog.e(TAG, "融合资源 " + src.srcId + " 的遮罩目录无效：" + src.srcPath);
                     continue;
                 }
                 if (!File.separator.equals(src.srcPath.substring(src.srcPath.length() - 1))) {
@@ -93,7 +96,7 @@ class CommonArgTool {
         // 检查第一帧
         File firstFrame = new File(commonArg.inputPath + "000.png");
         if (!firstFrame.exists()) {
-            TLog.e(TAG, "first frame 000.png does not exist");
+            TLog.e(TAG, "第一帧 000.png 不存在");
             return false;
         }
         // 获取视频高度
@@ -101,7 +104,7 @@ class CommonArgTool {
         commonArg.rgbPoint.w = inputBuf.getWidth();
         commonArg.rgbPoint.h = inputBuf.getHeight();
         if (commonArg.rgbPoint.w <= 0 || commonArg.rgbPoint.h <= 0) {
-            TLog.e(TAG, "video size " + commonArg.rgbPoint.w + "x" + commonArg.rgbPoint.h);
+            TLog.e(TAG, "视频尺寸异常：" + commonArg.rgbPoint.w + "x" + commonArg.rgbPoint.h);
             return false;
         }
 
@@ -144,8 +147,8 @@ class CommonArgTool {
         commonArg.outputH += size[1];
 
         if (commonArg.outputW > 1504 || commonArg.outputH > 1504) {
-            String msg = "[Warning] Output video width:" + commonArg.outputW + " or height:" + commonArg.outputH
-                    + " is over 1504. Some devices will display exception. For example green screen!";
+            String msg = "输出视频宽度：" + commonArg.outputW + " 或高度：" + commonArg.outputH
+                    + " 超过 1504，部分设备可能显示异常，例如绿屏。";
             TLog.w(TAG, msg);
             if (toolListener != null) {
                 toolListener.onWarning(msg);
@@ -165,19 +168,19 @@ class CommonArgTool {
 
 
         if (commonArg.totalFrame <= 0) {
-            TLog.e(TAG, "totalFrame=" + commonArg.totalFrame);
+            TLog.e(TAG, "总帧数异常：" + commonArg.totalFrame);
             return false;
         }
 
         // 码率检查
         if (!commonArg.enableCrf && commonArg.bitrate <= 0) {
-            TLog.e(TAG, "bitrate=" + commonArg.bitrate);
+            TLog.e(TAG, "码率必须大于 0，当前值：" + commonArg.bitrate);
             return false;
         }
 
         // crf检查
         if (commonArg.enableCrf && (commonArg.crf < 0 || commonArg.crf > 51)) {
-            TLog.e(TAG, "crf=" + commonArg.crf + ", no in [0, 51]");
+            TLog.e(TAG, "CRF 必须在 [0, 51] 内，当前值：" + commonArg.crf);
             return false;
         }
 
